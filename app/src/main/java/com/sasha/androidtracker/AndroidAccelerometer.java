@@ -22,7 +22,7 @@ import android.widget.Toast;
  */
 public class AndroidAccelerometer implements SensorEventListener {
 
-    private float lastX, lastY, lastZ;
+    public float lastX, lastY, lastZ;
 
     private SensorManager sensorManager;
     private Sensor accelerometer;

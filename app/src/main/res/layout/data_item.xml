@@ -22,7 +22,7 @@
         android:layout_toEndOf="@+id/timeStamp"
         android:layout_toRightOf="@+id/timeStamp"
         android:orientation="vertical"
-        android:layout_marginLeft="35sp"
+        android:layout_marginLeft="20sp"
         android:layout_gravity="right|top">
 
         <TextView

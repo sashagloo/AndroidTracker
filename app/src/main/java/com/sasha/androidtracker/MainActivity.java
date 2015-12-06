@@ -5,6 +5,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     LocationListener locationListener;
     Location location;
     AndroidAccelerometer accelerometer;
+    Vibrator vibrator;
 
     List<GPSData> dataList;
     Timer timer;
@@ -44,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        vibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
 
         FloatingActionButton btn1 = (FloatingActionButton) findViewById(R.id.btn1);
         FloatingActionButton btn2 = (FloatingActionButton) findViewById(R.id.btn2);
@@ -83,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 
                 accelerometer = new AndroidAccelerometer(MainActivity.this);
-//                accelerometer.onResume();
+                accelerometer.onResume();
 
                 if(timer != null){
                     timer.cancel();
@@ -92,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
                     myTimerTask = new MyTimerTask();
                     //delay 1000ms, repeat in 5000ms
                     timer.schedule(myTimerTask, 1000, 5000);
+                    vibrator.vibrate(1000);
                 }
             }
         });
@@ -104,8 +109,9 @@ public class MainActivity extends AppCompatActivity {
                     locationManager.removeUpdates(locationListener);
                     timer.cancel();
                     timer = null;
-//
-//                    accelerometer.onPause();
+
+                    accelerometer.onPause();
+                    vibrator.vibrate(1000);
                 }
 
             }
@@ -155,7 +161,10 @@ public class MainActivity extends AppCompatActivity {
         GPSData data = new GPSData();
         SimpleDateFormat formater = new SimpleDateFormat("dd-MM-yyyy  HH:mm:ss");
 
-        data.setTimeStamp(accelerometer.status + " | " + String.valueOf(formater.format(new Date())));
+        data.setTimeStamp(accelerometer.lastX + ":"
+                + accelerometer.lastY + ":"
+                + accelerometer.lastZ + ":"
+                + " \n " + String.valueOf(formater.format(new Date())));
         data.setLatitude(String.valueOf(location.getLatitude()));
         data.setLongitude(String.valueOf(location.getLongitude()));
 
