@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+
 public class MainActivity extends AppCompatActivity {
 
     LocationManager locationManager;
@@ -158,18 +159,20 @@ public class MainActivity extends AppCompatActivity {
 
     protected void updateDataList() {
 
-        GPSData data = new GPSData();
-        SimpleDateFormat formater = new SimpleDateFormat("dd-MM-yyyy  HH:mm:ss");
+        // if location is null we need to wait for a location fix first
+        if (location != null) {
+            GPSData data = new GPSData();
+            SimpleDateFormat formater = new SimpleDateFormat("dd-MM-yyyy  HH:mm:ss");
 
-        data.setTimeStamp(accelerometer.lastX + ":"
-                + accelerometer.lastY + ":"
-                + accelerometer.lastZ + ":"
-                + " \n " + String.valueOf(formater.format(new Date())));
-        data.setLatitude(String.valueOf(location.getLatitude()));
-        data.setLongitude(String.valueOf(location.getLongitude()));
+            data.setTimeStamp(accelerometer.lastX + ":"
+                    + accelerometer.lastY + ":"
+                    + accelerometer.lastZ + ":"
+                    + " \n " + String.valueOf(formater.format(new Date())));
+            data.setLatitude(String.valueOf(location.getLatitude()));
+            data.setLongitude(String.valueOf(location.getLongitude()));
 
-        dataList.add(data);
-
+            dataList.add(data);
+        }
     }
 
     /**
