@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton btn1 = (FloatingActionButton) findViewById(R.id.btn1);
         FloatingActionButton btn2 = (FloatingActionButton) findViewById(R.id.btn2);
 
-        if(timer != null){
+        if (timer != null) {
             timer.cancel();
         }
 
@@ -61,10 +61,10 @@ public class MainActivity extends AppCompatActivity {
         locationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
 
-                while (MainActivity.this.location != location) {
+                if (location != null) {
                     MainActivity.this.location = location;
-                    Log.i("LOCATION", "" + MainActivity.this.location.getLatitude() + " : " +
-                            MainActivity.this.location.getLongitude());
+                    Log.i("LOCATION", "" + location.getLatitude() + " : " +
+                            location.getLongitude());
                 }
             }
 
@@ -89,9 +89,9 @@ public class MainActivity extends AppCompatActivity {
                 accelerometer = new AndroidAccelerometer(MainActivity.this);
                 accelerometer.onResume();
 
-                if(timer != null){
+                if (timer != null) {
                     timer.cancel();
-                } else{
+                } else {
                     timer = new Timer();
                     myTimerTask = new MyTimerTask();
                     //delay 1000ms, repeat in 5000ms
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                if (timer!=null){
+                if (timer != null) {
                     locationManager.removeUpdates(locationListener);
                     timer.cancel();
                     timer = null;
@@ -113,7 +113,6 @@ public class MainActivity extends AppCompatActivity {
                     accelerometer.onPause();
                     vibrator.vibrate(1000);
                 }
-
             }
         });
 
@@ -180,13 +179,16 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-            runOnUiThread(new Runnable(){
+            runOnUiThread(new Runnable() {
 
                 @Override
                 public void run() {
-                    MainActivity.this.updateDataList();
-                    MainActivity.this.refreshDisplay();
-                }});
+                    if (MainActivity.this.location != null) {
+                        MainActivity.this.updateDataList();
+                        MainActivity.this.refreshDisplay();
+                    }
+                }
+            });
         }
 
     }
