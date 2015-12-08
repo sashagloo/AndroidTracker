@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-
 public class MainActivity extends AppCompatActivity {
 
     LocationManager locationManager;
@@ -38,7 +37,6 @@ public class MainActivity extends AppCompatActivity {
     Location location;
     AndroidAccelerometer accelerometer;
     Vibrator vibrator;
-
 
     List<GPSData> dataList;
     Timer timer;
@@ -89,12 +87,14 @@ public class MainActivity extends AppCompatActivity {
         btn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 // if API level is >=23 we need to ask permission from the user
-                if ( Build.VERSION.SDK_INT >= 23 &&
-                        ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
+                if (Build.VERSION.SDK_INT >= 23 &&
+                        ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                         ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    return  ;
+                    return;
                 }
+
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 
@@ -129,7 +129,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -169,20 +168,17 @@ public class MainActivity extends AppCompatActivity {
 
     protected void updateDataList() {
 
-        // if location is null we need to wait for a location fix first
-        if (location != null) {
-            GPSData data = new GPSData();
-            SimpleDateFormat formater = new SimpleDateFormat("dd-MM-yyyy  HH:mm:ss");
+        GPSData data = new GPSData();
+        SimpleDateFormat formater = new SimpleDateFormat("dd-MM-yyyy  HH:mm:ss");
 
-            data.setTimeStamp(accelerometer.lastX + ":"
-                    + accelerometer.lastY + ":"
-                    + accelerometer.lastZ + ":"
-                    + " \n " + String.valueOf(formater.format(new Date())));
-            data.setLatitude(String.valueOf(location.getLatitude()));
-            data.setLongitude(String.valueOf(location.getLongitude()));
+        data.setTimeStamp(accelerometer.lastX + ":"
+                + accelerometer.lastY + ":"
+                + accelerometer.lastZ + ":"
+                + " \n " + String.valueOf(formater.format(new Date())));
+        data.setLatitude(String.valueOf(location.getLatitude()));
+        data.setLongitude(String.valueOf(location.getLongitude()));
 
-            dataList.add(data);
-        }
+        dataList.add(data);
     }
 
     /**
