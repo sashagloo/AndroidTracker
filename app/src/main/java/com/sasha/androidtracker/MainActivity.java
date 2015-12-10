@@ -256,6 +256,7 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
     }
+
     /**
      * This method instantiate RequestPackage class
      * and starts it in MyTask
@@ -264,21 +265,29 @@ public class MainActivity extends AppCompatActivity {
      * @see com.sasha.androidtracker.MainActivity.MyLoadTask
      */
 
-    private void requestData(String method
-                            , String uri
-                            ) {
+    private void requestData(String method, String uri) {
 
+        MyLoadTask task = new MyLoadTask();
         RequestPackage requestPackage = new RequestPackage();
         requestPackage.setMethod(method);
         requestPackage.setUri(uri);
 
-//        requestPackage.setParams("param_1", "value_1");
-//        requestPackage.setParams("param_1", "value_1");
-//        requestPackage.setParams("param_1", "value_1");
-//        requestPackage.setParams("param_1", "value_1");
+        if (method.equals("POST")) {
+            if (dataList.size() > 0) {
+                for (GPSData data : dataList) {
+                    requestPackage.setParams("accelerometerX", data.getAccelerometerX());
+                    requestPackage.setParams("accelerometerY", data.getAccelerometerY());
+                    requestPackage.setParams("accelerometerZ", data.getAccelerometerZ());
+                    requestPackage.setParams("timeStamp", data.getTimeStamp());
+                    requestPackage.setParams("latitude", data.getLatitude());
+                    requestPackage.setParams("longitude", data.getLongitude());
 
-        MyLoadTask task = new MyLoadTask();
-        task.execute(requestPackage);
+                    task.execute(requestPackage);
+                }
+            }
+        } else if (method.equals("GET")) task.execute(requestPackage);
+
+
     }
 
     /**
@@ -317,8 +326,16 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 /**  get data from HTTPManager ---------------------------*/
-                String content = getData(params[0]);
-                MainActivity.this.dataList = DataJSONParser.parseFeed(content);
+
+                if (params[0].getMethod().equals("GET")) {
+                    String content = getData(params[0]);
+                    MainActivity.this.dataList = DataJSONParser.parseFeed(content);
+                }
+                if (params[0].getMethod().equals("POST")) {
+                    String content = getData(params[0]);
+                    MainActivity.this.dataList = DataJSONParser.parseFeed(content);
+                }
+
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -331,6 +348,7 @@ public class MainActivity extends AppCompatActivity {
          * This method receives a result from doInBackground()
          * has access to the main thread
          * executes automatically
+         *
          * @param result
          */
         @Override

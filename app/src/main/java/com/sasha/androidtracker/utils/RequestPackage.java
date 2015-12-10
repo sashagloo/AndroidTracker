@@ -35,9 +35,7 @@ public class RequestPackage {
         this.method = method;
     }
 
-    public Map<String, String> getParams() {
-        return params;
-    }
+    public Map<String, String> getParams() { return params;  }
     public void setParams(Map<String, String> params) {
         this.params = params;
     }

@@ -42,7 +42,6 @@ public class GPSData {
     public String getTimeStamp() {
         return timeStamp;
     }
-
     public void setTimeStamp(String timeStamp) {
         this.timeStamp = timeStamp;
     }
@@ -50,7 +49,6 @@ public class GPSData {
     public String getLatitude() {
         return latitude;
     }
-
     public void setLatitude(String latitude) {
         this.latitude = latitude;
     }
@@ -58,7 +56,6 @@ public class GPSData {
     public String getLongitude() {
         return longitude;
     }
-
     public void setLongitude(String longitude) {
         this.longitude = longitude;
     }
