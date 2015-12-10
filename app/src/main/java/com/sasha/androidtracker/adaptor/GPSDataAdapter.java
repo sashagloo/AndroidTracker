@@ -81,6 +81,10 @@ public class GPSDataAdapter extends ArrayAdapter<GPSData> {
         TextView timeStamp = (TextView) view.findViewById(R.id.timeStamp);
         timeStamp.setText(data.getTimeStamp());
 
+        /** Display Accelerometer of data in the TextView widget */
+        TextView accelerometer = (TextView) view.findViewById(R.id.tvAccelerometer);
+        accelerometer.setText(data.getAccelerometerX() + " : " +  data.getAccelerometerY() + " : " + data.getAccelerometerZ());
+
         /** Display Latitude from data in the TextView widget */
         TextView tvLatitude = (TextView) view.findViewById(R.id.tvLatitude);
         tvLatitude.setText(data.getLatitude());
