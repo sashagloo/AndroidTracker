@@ -272,6 +272,7 @@ public class MainActivity extends AppCompatActivity {
         requestPackage.setMethod(method);
         requestPackage.setUri(uri);
 
+        // if method is 'POST' execute MyLoadTask to send every GPSData object separately
         if (method.equals("POST")) {
             if (dataList.size() > 0) {
                 for (GPSData data : dataList) {
@@ -281,6 +282,7 @@ public class MainActivity extends AppCompatActivity {
                     requestPackage.setParams("timeStamp", data.getTimeStamp());
                     requestPackage.setParams("latitude", data.getLatitude());
                     requestPackage.setParams("longitude", data.getLongitude());
+                    requestPackage.setParams("hashCode", String.valueOf(data.hashCode()));
 
                     task.execute(requestPackage);
                 }
@@ -333,7 +335,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (params[0].getMethod().equals("POST")) {
                     String content = getData(params[0]);
-                    MainActivity.this.dataList = DataJSONParser.parseFeed(content);
                 }
 
 

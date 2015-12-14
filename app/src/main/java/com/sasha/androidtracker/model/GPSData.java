@@ -18,9 +18,7 @@ public class GPSData {
     private String accelerometerY;
     private String accelerometerZ;
 
-    public String getAccelerometerX() {
-        return accelerometerX;
-    }
+    public String getAccelerometerX() { return accelerometerX; }
     public void setAccelerometerX(String accelerometerX) {
         this.accelerometerX = accelerometerX;
     }
@@ -42,9 +40,7 @@ public class GPSData {
     public String getTimeStamp() {
         return timeStamp;
     }
-    public void setTimeStamp(String timeStamp) {
-        this.timeStamp = timeStamp;
-    }
+    public void setTimeStamp(String timeStamp) {  this.timeStamp = timeStamp; }
 
     public String getLatitude() {
         return latitude;
@@ -58,6 +54,22 @@ public class GPSData {
     }
     public void setLongitude(String longitude) {
         this.longitude = longitude;
+    }
+
+    /**
+     * method to generate close to unique hash codes
+     * @return hashCode int value
+     */
+    @Override
+    public int hashCode() {
+        int value = 0;
+        for (char i : timeStamp.toCharArray()) value += i;
+        float lat = Float.parseFloat(latitude);
+        float lon = Float.parseFloat(longitude);
+
+        return (    (7 * value)
+                    ^ (11 * (int) lat)
+                    ^ (53 * (int) lon) );
     }
 
     @Override
