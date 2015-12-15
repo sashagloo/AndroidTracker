@@ -27,9 +27,8 @@ import com.sasha.androidtracker.adaptor.GPSDataAdapter;
 import com.sasha.androidtracker.model.GPSData;
 import com.sasha.androidtracker.parsers.DataJSONParser;
 import com.sasha.androidtracker.utils.RequestPackage;
-
+import com.sasha.androidtracker.utils.TestPost;
 import static com.sasha.androidtracker.utils.HTTPManager.*;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -62,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
 
         progressBar = (ProgressBar) findViewById(R.id.progressBar1);
         progressBar.setVisibility(View.INVISIBLE);
-
+        dataList = new ArrayList<GPSData>();
         vibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
 
         FloatingActionButton btn1 = (FloatingActionButton) findViewById(R.id.btn1);
@@ -138,6 +137,8 @@ public class MainActivity extends AppCompatActivity {
                     accelerometer.onPause();
                     vibrator.vibrate(1000);
                 }
+//                new TestPost().execute();
+
             }
         });
 
@@ -174,9 +175,11 @@ public class MainActivity extends AppCompatActivity {
             else {
                 Toast.makeText(this, "Network isn't available", Toast.LENGTH_LONG).show();
             }
+
         }
         return false;
     }
+
 
     /**
      * This method instantiate GPSDataAdapter and refresh content to display ----------------
