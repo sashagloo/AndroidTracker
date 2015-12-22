@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
                     myTimerTask = new MyTimerTask();
                     //delay 1000ms, repeat in 5000ms
                     //timer.schedule(myTimerTask, 1000, 5000);
-                    timer.schedule(new TimerSendData(), 1000, (1000 * 60));
+                    timer.schedule(new TimerSendData(), 1000, (1000 * 30));
                     vibrator.vibrate(1000);
                 }
             }
@@ -131,6 +131,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 if (timer != null) {
+                    // if API level is >=23 we need to ask permission from the user
+                    if (Build.VERSION.SDK_INT >= 23 &&
+                            ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                            ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        return;
+                    }
                     locationManager.removeUpdates(locationListener);
                     timer.cancel();
                     timer = null;
@@ -254,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     if (MainActivity.this.location != null) {
-                        SendData sendData = new SendData();
+                        SendData sendData = new SendData(getApplicationContext());
                         GPSData[] dataArray = new GPSData[1];
                         GPSData data = MainActivity.this.getGpsData();
                         dataArray[0] = data;
