@@ -1,4 +1,4 @@
-package com.sasha.androidtracker.utility;
+package com.sasha.androidtracker.utils;
 
 import android.app.Activity;
 import android.util.DisplayMetrics;

@@ -25,16 +25,12 @@ import android.widget.Toast;
 import com.sasha.androidtracker.adaptor.GPSDataAdapter;
 import com.sasha.androidtracker.db.GPSDataSource;
 import com.sasha.androidtracker.model.GPSData;
-<<<<<<< HEAD
-import com.sasha.androidtracker.utility.AndroidAccelerometer;
-
-=======
-import com.sasha.androidtracker.parsers.DataJSONParser;
-import com.sasha.androidtracker.utils.RequestPackage;
+import com.sasha.androidtracker.utils.AndroidAccelerometer;
+import com.sasha.androidtracker.utils.TestPost;
 import com.sasha.androidtracker.utils.SendData;
-import static com.sasha.androidtracker.utils.HTTPManager.*;
->>>>>>> origin/dev
+
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
@@ -77,23 +73,23 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         final Context context = getApplicationContext();
 
-        /** get connection with the database en open it -------------------------*/
-        dataSource = new GPSDataSource(this);
-        dataSource.open();
-
-        Log.i(LOGTAG, "database connected");
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         vibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
 
-        FloatingActionButton btn1 = (FloatingActionButton) findViewById(R.id.btn1);
-        FloatingActionButton btn2 = (FloatingActionButton) findViewById(R.id.btn2);
+        dataList = new ArrayList<>();
+
+        /** get connection with the database en open it -------------------------*/
+        dataSource = new GPSDataSource(MainActivity.this);
+        dataSource.open();
+        Log.i(LOGTAG, "Local database connected");
 
         if (timer != null) {
             timer.cancel();
         }
+
+        intent = new Intent(this, GoogleMapsActivity.class);
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
@@ -114,6 +110,9 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "GPS/Use Wireless network is not enabled", Toast.LENGTH_SHORT).show();
             }
         };
+
+        FloatingActionButton btn1 = (FloatingActionButton) findViewById(R.id.btn1);
+        FloatingActionButton btn2 = (FloatingActionButton) findViewById(R.id.btn2);
 
         // Register the listener with the Location Manager to receive location updates
         btn1.setOnClickListener(new View.OnClickListener() {
@@ -136,11 +135,11 @@ public class MainActivity extends AppCompatActivity {
                 if (timer != null) {
                     timer.cancel();
                 } else {
+
                     timer = new Timer();
                     myTimerTask = new MyTimerTask();
                     //delay 1000ms, repeat in 5000ms
-                    //timer.schedule(myTimerTask, 1000, 5000);
-                    timer.schedule(new TimerSendData(), 1000, (1000 * 30));
+                    timer.schedule(myTimerTask, 1000, 5000);
                     vibrator.vibrate(1000);
 
                     Snackbar.make(v, "The launch of data registration", Snackbar.LENGTH_LONG)
@@ -160,10 +159,7 @@ public class MainActivity extends AppCompatActivity {
                             ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                         return;
                     }
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/dev
                     locationManager.removeUpdates(locationListener);
                     timer.cancel();
                     timer = null;
@@ -177,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        refreshDisplay();
+        //refreshDisplay();
     }
 
     @Override
@@ -194,9 +190,28 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menu_clear:
                 dataSource.clearData();
 
-                Toast.makeText(this, "Data has been DELETED", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Local data has been DELETED", Toast.LENGTH_LONG).show();
 
+                dataList = null;
                 refreshDisplay();
+                break;
+
+            case R.id.menu_load:
+
+                //TODO define data loading from the server
+
+                break;
+
+            case R.id.menu_send:
+
+                /** send data every 30 sec. ------- */
+                timer = new Timer();
+                myTimerTask = new MyTimerTask();
+                //delay 1000ms, repeat in 1 min
+                timer.schedule(new TimerSendData(), 1000, (1000 * 30));
+                vibrator.vibrate(1000);
+
+                Toast.makeText(this, "Registered data has been send to the server", Toast.LENGTH_LONG).show();
                 break;
 
             default:
@@ -211,41 +226,8 @@ public class MainActivity extends AppCompatActivity {
     protected View refreshDisplay() {
 
         dataList = dataSource.findAll();
-        intent = new Intent(this, GoogleMapsActivity.class);
 
-<<<<<<< HEAD
         Log.i(LOGTAG, "database findAll");
-=======
-        data.setAccelerometerX(String.valueOf(accelerometer.lastY));
-        data.setAccelerometerY(String.valueOf(accelerometer.lastY));
-        data.setAccelerometerZ(String.valueOf(accelerometer.lastZ));
-        data.setTimeStamp(String.valueOf(formater.format(new Date())));
-        data.setLatitude(String.valueOf(location.getLatitude()));
-        data.setLongitude(String.valueOf(location.getLongitude()));
-
-        dataList.add(data);
-    }
-
-    protected GPSData getGpsData() {
-        GPSData data = new GPSData();
-        SimpleDateFormat formater = new SimpleDateFormat("dd-MM-yyyy  HH:mm:ss");
-
-        data.setAccelerometerX(String.valueOf(accelerometer.lastY));
-        data.setAccelerometerY(String.valueOf(accelerometer.lastY));
-        data.setAccelerometerZ(String.valueOf(accelerometer.lastZ));
-        data.setTimeStamp(String.valueOf(formater.format(new Date())));
-        data.setLatitude(String.valueOf(location.getLatitude()));
-        data.setLongitude(String.valueOf(location.getLongitude()));
-
-        return data;
-    }
-
-    /**
-     * MyTimerTask inner class  ----------------------------------------------------------------
-     * repeat running MainActivity class methods at defined delay
-     */
-    class MyTimerTask extends TimerTask {
->>>>>>> origin/dev
 
         if (dataList.size() > 0 ) {
             GPSDataAdapter adapter = new GPSDataAdapter(this, dataList);
@@ -267,34 +249,10 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
-<<<<<<< HEAD
     /**
-     * This method add data item to the List<GPSData> dataList
+     * Create GPSData object with data from sensors
      */
-    protected void updateDataList() {
-=======
-    class TimerSendData extends TimerTask {
-
-        @Override
-        public void run() {
-            runOnUiThread(new Runnable() {
-
-                @Override
-                public void run() {
-                    if (MainActivity.this.location != null) {
-                        SendData sendData = new SendData(getApplicationContext());
-                        GPSData[] dataArray = new GPSData[1];
-                        GPSData data = MainActivity.this.getGpsData();
-                        dataArray[0] = data;
-                        sendData.execute(dataArray);
-                    }
-                }
-            });
-        }
-    }
-
->>>>>>> origin/dev
-
+    protected GPSData getGpsData() {
         GPSData data = new GPSData();
         SimpleDateFormat formater = new SimpleDateFormat("dd-MM-yyyy  HH:mm:ss");
 
@@ -305,7 +263,7 @@ public class MainActivity extends AppCompatActivity {
         data.setLatitude(location.getLatitude());
         data.setLongitude(location.getLongitude());
 
-        dataSource.create(data);
+        return data;
     }
 
     /**
@@ -337,6 +295,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * MyTimerTask inner class
      * repeat running MainActivity class methods at defined delay
+     * to get current data and display it on the screen
      */
     class MyTimerTask extends TimerTask {
 
@@ -346,12 +305,40 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     if (MainActivity.this.location != null) {
-                        MainActivity.this.updateDataList();
+                        dataSource.create(MainActivity.this.getGpsData());
                         MainActivity.this.refreshDisplay();
                     }
                 }
             });
         }
 
+    }
+
+    /**
+     * TimerSendData inner class
+     * to get current data, display it on the screen and send it to the server
+     */
+    class TimerSendData extends TimerTask {
+
+        @Override
+        public void run() {
+            runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+                    if (MainActivity.this.location != null) {
+                        SendData sendData = new SendData(getApplicationContext());
+                        GPSData[] dataArray = new GPSData[1];
+                        GPSData data = MainActivity.this.getGpsData();
+                        dataArray[0] = data;
+
+                        dataSource.create(data);
+                        MainActivity.this.refreshDisplay();
+
+                        sendData.execute(dataArray);
+                    }
+                }
+            });
+        }
     }
 }

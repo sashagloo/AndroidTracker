@@ -34,23 +34,23 @@ public class SendData extends AsyncTask<GPSData, Void, HttpResponse>{
         HttpClient httpClient = new DefaultHttpClient();
         try {
             JSONObject jsonObj = new JSONObject();
-//            jsonObj.put("latitude", gpsdata[0].getLatitude());
-//            jsonObj.put("longitude", gpsdata[0].getLongitude());
-//            jsonObj.put("acceleroMeterX", gpsdata[0].getAccelerometerX());
-//            jsonObj.put("acceleroMeterY", gpsdata[0].getAccelerometerY());
-//            jsonObj.put("acceleroMeterZ", gpsdata[0].getAccelerometerZ());
-//            jsonObj.put("timestamp", gpsdata[0].getTimeStamp());
 
             // encrypt data using public key before sending
             // the encrypted byte array is encoded to a base64 string so it can be put in a json object
             EncryptionHelper encryptor = new EncryptionHelper(this.context);
 
-            String latitude = Base64.encodeToString(encryptor.testEncrypt(gpsdata[0].getLatitude()), Base64.DEFAULT);
-            String longitude = Base64.encodeToString(encryptor.testEncrypt(gpsdata[0].getLongitude()), Base64.DEFAULT);
-            String acceleroMeterX = Base64.encodeToString(encryptor.testEncrypt(gpsdata[0].getAccelerometerX()), Base64.DEFAULT);
-            String acceleroMeterY = Base64.encodeToString(encryptor.testEncrypt(gpsdata[0].getAccelerometerY()), Base64.DEFAULT);
-            String acceleroMeterZ = Base64.encodeToString(encryptor.testEncrypt(gpsdata[0].getAccelerometerZ()), Base64.DEFAULT);
-            String timestamp = Base64.encodeToString(encryptor.testEncrypt(gpsdata[0].getTimeStamp()), Base64.DEFAULT);
+            String latitude = Base64.encodeToString(encryptor.testEncrypt(
+                            String.valueOf(gpsdata[0].getLatitude())), Base64.DEFAULT);
+            String longitude = Base64.encodeToString(encryptor.testEncrypt(
+                            String.valueOf(gpsdata[0].getLongitude())), Base64.DEFAULT);
+            String acceleroMeterX = Base64.encodeToString(encryptor.testEncrypt(
+                            String.valueOf(gpsdata[0].getAccelerometerX())), Base64.DEFAULT);
+            String acceleroMeterY = Base64.encodeToString(encryptor.testEncrypt(
+                            String.valueOf(gpsdata[0].getAccelerometerY())), Base64.DEFAULT);
+            String acceleroMeterZ = Base64.encodeToString(encryptor.testEncrypt(
+                            String.valueOf(gpsdata[0].getAccelerometerZ())), Base64.DEFAULT);
+            String timestamp = Base64.encodeToString(encryptor.testEncrypt(
+                            String.valueOf(gpsdata[0].getTimeStamp())), Base64.DEFAULT);
 
             // fill json object with encrypted data strings
             jsonObj.put("latitude", latitude);
@@ -74,5 +74,6 @@ public class SendData extends AsyncTask<GPSData, Void, HttpResponse>{
         }
         return response;
     }
+
 
 }

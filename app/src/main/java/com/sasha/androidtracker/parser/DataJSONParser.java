@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * DataJSONParser utility class
- * to parse a content to List<GPSData>
+ * to parse a content from JSON array to List<GPSData>
  * Project : AndroidTracker
  *
  * @autor Sasha
@@ -19,32 +19,32 @@ import java.util.List;
  */
 public class DataJSONParser {
 
-        public static List<GPSData> parseFeed(String content) {
+    public static List<GPSData> parseFeed(String content) {
 
-            try {
-                JSONArray array = new JSONArray(content);
-                List<GPSData> dataList = new ArrayList<>();
+        try {
+            JSONArray array = new JSONArray(content);
+            List<GPSData> dataList = new ArrayList<>();
 
-                for (int i = 0; i < array.length(); i++) {
+            for (int i = 0; i < array.length(); i++) {
 
-                    JSONObject object = array.getJSONObject(i);
-                    GPSData data = new GPSData();
+                JSONObject object = array.getJSONObject(i);
+                GPSData data = new GPSData();
 
-                    //TODO definition data fields from original Data Base
-//                    data.setProductId(object.getInt("productId"));
-//                    data.setName(object.getString("name"));
-//                    data.setCategory(object.getString("category"));
-//                    data.setInstructions(object.getString("instructions"));
-//                    data.setPhoto(object.getString("photo"));
-//                    data.setPrice(object.getDouble("price"));
+                data.setTimeStamp(object.getString("timeStamp"));
+                data.setLatitude(object.getDouble("latitude"));
+                data.setLongitude(object.getDouble("longitude"));
+                data.setAccelerometerX((float) object.getDouble("accelerometerX"));
+                data.setAccelerometerY((float) object.getDouble("accelerometerY"));
+                data.setAccelerometerZ((float) object.getDouble("accelerometerZ"));
 
-                    dataList.add(data);
-                }
-                return dataList;
-            } catch (JSONException e) {
-                e.printStackTrace();
-                return null;
+                dataList.add(data);
             }
+            return dataList;
 
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
         }
+
     }
+}

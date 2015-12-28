@@ -167,8 +167,8 @@ public class EncryptionHelper {
     public byte[] testEncrypt(String input){
         // Check if the pair of keys are present else generate those.
         //if (!this.areKeysPresent()) {
-            // Method generates a pair of keys using the RSA algorithm and stores it
-            // in their respective files
+        // Method generates a pair of keys using the RSA algorithm and stores it
+        // in their respective files
         //    this.generateKey();
         //}
 
