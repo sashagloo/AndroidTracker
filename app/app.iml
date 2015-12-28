@@ -98,5 +98,6 @@
     <orderEntry type="library" exported="" name="design-23.1.1" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-23.1.1" level="project" />
     <orderEntry type="library" exported="" name="org.jbundle.util.osgi.wrapped.org.apache.http.client-4.1.2" level="project" />
+    <orderEntry type="library" exported="" name="base64-2.0.0" level="project" />
   </component>
 </module>

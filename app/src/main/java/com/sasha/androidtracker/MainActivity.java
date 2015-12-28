@@ -25,8 +25,15 @@ import android.widget.Toast;
 import com.sasha.androidtracker.adaptor.GPSDataAdapter;
 import com.sasha.androidtracker.db.GPSDataSource;
 import com.sasha.androidtracker.model.GPSData;
+<<<<<<< HEAD
 import com.sasha.androidtracker.utility.AndroidAccelerometer;
 
+=======
+import com.sasha.androidtracker.parsers.DataJSONParser;
+import com.sasha.androidtracker.utils.RequestPackage;
+import com.sasha.androidtracker.utils.SendData;
+import static com.sasha.androidtracker.utils.HTTPManager.*;
+>>>>>>> origin/dev
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -132,7 +139,8 @@ public class MainActivity extends AppCompatActivity {
                     timer = new Timer();
                     myTimerTask = new MyTimerTask();
                     //delay 1000ms, repeat in 5000ms
-                    timer.schedule(myTimerTask, 1000, 5000);
+                    //timer.schedule(myTimerTask, 1000, 5000);
+                    timer.schedule(new TimerSendData(), 1000, (1000 * 30));
                     vibrator.vibrate(1000);
 
                     Snackbar.make(v, "The launch of data registration", Snackbar.LENGTH_LONG)
@@ -152,7 +160,10 @@ public class MainActivity extends AppCompatActivity {
                             ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                         return;
                     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/dev
                     locationManager.removeUpdates(locationListener);
                     timer.cancel();
                     timer = null;
@@ -202,7 +213,39 @@ public class MainActivity extends AppCompatActivity {
         dataList = dataSource.findAll();
         intent = new Intent(this, GoogleMapsActivity.class);
 
+<<<<<<< HEAD
         Log.i(LOGTAG, "database findAll");
+=======
+        data.setAccelerometerX(String.valueOf(accelerometer.lastY));
+        data.setAccelerometerY(String.valueOf(accelerometer.lastY));
+        data.setAccelerometerZ(String.valueOf(accelerometer.lastZ));
+        data.setTimeStamp(String.valueOf(formater.format(new Date())));
+        data.setLatitude(String.valueOf(location.getLatitude()));
+        data.setLongitude(String.valueOf(location.getLongitude()));
+
+        dataList.add(data);
+    }
+
+    protected GPSData getGpsData() {
+        GPSData data = new GPSData();
+        SimpleDateFormat formater = new SimpleDateFormat("dd-MM-yyyy  HH:mm:ss");
+
+        data.setAccelerometerX(String.valueOf(accelerometer.lastY));
+        data.setAccelerometerY(String.valueOf(accelerometer.lastY));
+        data.setAccelerometerZ(String.valueOf(accelerometer.lastZ));
+        data.setTimeStamp(String.valueOf(formater.format(new Date())));
+        data.setLatitude(String.valueOf(location.getLatitude()));
+        data.setLongitude(String.valueOf(location.getLongitude()));
+
+        return data;
+    }
+
+    /**
+     * MyTimerTask inner class  ----------------------------------------------------------------
+     * repeat running MainActivity class methods at defined delay
+     */
+    class MyTimerTask extends TimerTask {
+>>>>>>> origin/dev
 
         if (dataList.size() > 0 ) {
             GPSDataAdapter adapter = new GPSDataAdapter(this, dataList);
@@ -224,10 +267,33 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
+<<<<<<< HEAD
     /**
      * This method add data item to the List<GPSData> dataList
      */
     protected void updateDataList() {
+=======
+    class TimerSendData extends TimerTask {
+
+        @Override
+        public void run() {
+            runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+                    if (MainActivity.this.location != null) {
+                        SendData sendData = new SendData(getApplicationContext());
+                        GPSData[] dataArray = new GPSData[1];
+                        GPSData data = MainActivity.this.getGpsData();
+                        dataArray[0] = data;
+                        sendData.execute(dataArray);
+                    }
+                }
+            });
+        }
+    }
+
+>>>>>>> origin/dev
 
         GPSData data = new GPSData();
         SimpleDateFormat formater = new SimpleDateFormat("dd-MM-yyyy  HH:mm:ss");
