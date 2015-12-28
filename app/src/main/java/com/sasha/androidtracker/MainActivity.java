@@ -1,17 +1,16 @@
 package com.sasha.androidtracker;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -19,36 +18,51 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.sasha.androidtracker.adaptor.GPSDataAdapter;
+import com.sasha.androidtracker.db.GPSDataSource;
 import com.sasha.androidtracker.model.GPSData;
-import com.sasha.androidtracker.parsers.DataJSONParser;
-import com.sasha.androidtracker.utils.RequestPackage;
-import com.sasha.androidtracker.utils.TestPost;
-import static com.sasha.androidtracker.utils.HTTPManager.*;
+import com.sasha.androidtracker.utility.AndroidAccelerometer;
+
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * MainActivity class
+ *  (main) launcher class of the app
+ *  start data base connection, instantiate sensors listeners, display current data
+ *
+ * @see AppCompatActivity, AndroidAccelerometer, LocationManager, LocationListener, Vibrator, GPSDataSource,
+ *      GPSData, Timer, TimerTask
+ * @author Sasha Antipin
+ * @version 0.9
+ * @since 29-11-2015
+ */
+
 public class MainActivity extends AppCompatActivity {
 
-    LocationManager locationManager;
-    LocationListener locationListener;
-    Location location;
-    AndroidAccelerometer accelerometer;
-    Vibrator vibrator;
-    ProgressBar progressBar;
+    private LocationManager locationManager;
+    private LocationListener locationListener;
+    private Location location;
+    private AndroidAccelerometer accelerometer;
+    private Vibrator vibrator;
+    private Intent intent;
 
-    List<GPSData> dataList;
-    Timer timer;
-    MyTimerTask myTimerTask;
-    List<MyLoadTask> myLoadTasks;
+    private GPSDataSource dataSource;
+    private List<GPSData> dataList;
+    private Timer timer;
+    private MyTimerTask myTimerTask;
+
+    public static final String GPSDATA_BUNDLE = "GPSDATA_BUNDLE";
+    public static final String LOGTAG = "TRACKER";
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,12 +70,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         final Context context = getApplicationContext();
 
+        /** get connection with the database en open it -------------------------*/
+        dataSource = new GPSDataSource(this);
+        dataSource.open();
+
+        Log.i(LOGTAG, "database connected");
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        progressBar = (ProgressBar) findViewById(R.id.progressBar1);
-        progressBar.setVisibility(View.INVISIBLE);
-        dataList = new ArrayList<GPSData>();
         vibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
 
         FloatingActionButton btn1 = (FloatingActionButton) findViewById(R.id.btn1);
@@ -70,8 +87,6 @@ public class MainActivity extends AppCompatActivity {
         if (timer != null) {
             timer.cancel();
         }
-
-        myLoadTasks = new ArrayList<>();
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
@@ -84,11 +99,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-            }
+            public void onStatusChanged(String provider, int status, Bundle extras) { }
 
-            public void onProviderEnabled(String provider) {
-            }
+            public void onProviderEnabled(String provider) { }
 
             public void onProviderDisabled(String provider) {
                 Toast.makeText(MainActivity.this, "GPS/Use Wireless network is not enabled", Toast.LENGTH_SHORT).show();
@@ -121,6 +134,9 @@ public class MainActivity extends AppCompatActivity {
                     //delay 1000ms, repeat in 5000ms
                     timer.schedule(myTimerTask, 1000, 5000);
                     vibrator.vibrate(1000);
+
+                    Snackbar.make(v, "The launch of data registration", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
                 }
             }
         });
@@ -130,18 +146,27 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 if (timer != null) {
+                    // if API level is >=23 we need to ask permission from the user
+                    if (Build.VERSION.SDK_INT >= 23 &&
+                            ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                            ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        return;
+                    }
+
                     locationManager.removeUpdates(locationListener);
                     timer.cancel();
                     timer = null;
 
                     accelerometer.onPause();
                     vibrator.vibrate(1000);
-                }
-//                new TestPost().execute();
 
+                    Snackbar.make(v, "Data registration is stopped", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
             }
         });
 
+        refreshDisplay();
     }
 
     @Override
@@ -153,64 +178,98 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
 
-        if (item.getItemId() == R.id.action_get_data) {
-            // if is it network connection > request data -------------------
-            //TODO define URL to connect RESTfull services
-            if (isOnLine()) requestData(
-                    "GET",
-                    "http://services.hanselandpetal.com/secure/flowers.json"
-            );
-            else {
-                Toast.makeText(this, "Network isn't available", Toast.LENGTH_LONG).show();
-            }
-        }
-        if (item.getItemId() == R.id.action_send_data) {
-            // if is it network connection > request data -------------------
-            //TODO define URL to connect RESTfull services
-            if (isOnLine()) requestData(
-                    "POST",
-                    "http://services.hanselandpetal.com/secure/flowers.json"
-            );
-            else {
-                Toast.makeText(this, "Network isn't available", Toast.LENGTH_LONG).show();
-            }
+            case R.id.menu_clear:
+                dataSource.clearData();
 
+                Toast.makeText(this, "Data has been DELETED", Toast.LENGTH_LONG).show();
+
+                refreshDisplay();
+                break;
+
+            default:
+                break;
         }
-        return false;
+        return super.onOptionsItemSelected(item);
     }
-
 
     /**
      * This method instantiate GPSDataAdapter and refresh content to display ----------------
-     *
-     * @param
      */
     protected View refreshDisplay() {
 
-        GPSDataAdapter adapter = new GPSDataAdapter(this, dataList);
-        ListView listView = (ListView) findViewById(android.R.id.list);
-        listView.setAdapter(adapter);
-        return listView;
+        dataList = dataSource.findAll();
+        intent = new Intent(this, GoogleMapsActivity.class);
+
+        Log.i(LOGTAG, "database findAll");
+
+        if (dataList.size() > 0 ) {
+            GPSDataAdapter adapter = new GPSDataAdapter(this, dataList);
+            ListView listView = (ListView) findViewById(android.R.id.list);
+            listView.setAdapter(adapter);
+
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                    GPSData data = dataList.get(position);
+                    intent.putExtra(MainActivity.this.GPSDATA_BUNDLE, data);
+                            startActivity(intent);
+                }
+            });
+
+            return listView;
+        }
+        return null;
     }
 
+    /**
+     * This method add data item to the List<GPSData> dataList
+     */
     protected void updateDataList() {
 
         GPSData data = new GPSData();
         SimpleDateFormat formater = new SimpleDateFormat("dd-MM-yyyy  HH:mm:ss");
 
-        data.setAccelerometerX(String.valueOf(accelerometer.lastY));
-        data.setAccelerometerY(String.valueOf(accelerometer.lastY));
-        data.setAccelerometerZ(String.valueOf(accelerometer.lastZ));
-        data.setTimeStamp(String.valueOf(formater.format(new Date())));
-        data.setLatitude(String.valueOf(location.getLatitude()));
-        data.setLongitude(String.valueOf(location.getLongitude()));
+        data.setTimeStamp(formater.format(new Date()));
+        data.setAccelerometerX(accelerometer.lastX);
+        data.setAccelerometerY(accelerometer.lastY);
+        data.setAccelerometerZ(accelerometer.lastZ);
+        data.setLatitude(location.getLatitude());
+        data.setLongitude(location.getLongitude());
 
-        dataList.add(data);
+        dataSource.create(data);
     }
 
     /**
-     * MyTimerTask inner class  ----------------------------------------------------------------
+     * Methode opens dataSource
+     * is called explicitly as the activity comes to the screen
+     * (automatically called by Android during the life cycle of the activity)
+     * The connection object within any activity is cached. You can call open() as
+     * many times as you will within one activity!!!
+     * @param
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        dataSource.open();
+    }
+
+    /**
+     * Methode close the data source connection
+     * whenever the activity pauses (as the activity closes down)
+     * don't forget close() the connection whenever the activity is going away!!!
+     * @param
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        dataSource.close();
+    }
+
+    /**
+     * MyTimerTask inner class
      * repeat running MainActivity class methods at defined delay
      */
     class MyTimerTask extends TimerTask {
@@ -218,7 +277,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             runOnUiThread(new Runnable() {
-
                 @Override
                 public void run() {
                     if (MainActivity.this.location != null) {
@@ -228,154 +286,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
-    }
 
-
-/**
- * *****************************************************************************************
- *  RESTfull services
- * *****************************************************************************************
- */
-
-
-    /**
-     * This method checks network connectivity -----------------------------------------
-     *
-     * @param
-     * @see android.net.ConnectivityManager
-     * @see android.net.NetworkInfo
-     */
-    protected boolean isOnLine() {
-        ConnectivityManager connectivityManager =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-
-        if (networkInfo != null && networkInfo.isConnectedOrConnecting()) {
-            Toast.makeText(MainActivity.this,
-                    "Connected to the network",
-                    Toast.LENGTH_LONG).show();
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * This method instantiate RequestPackage class
-     * and starts it in MyTask
-     *
-     * @param uri
-     * @see com.sasha.androidtracker.MainActivity.MyLoadTask
-     */
-
-    private void requestData(String method, String uri) {
-
-        MyLoadTask task = new MyLoadTask();
-        RequestPackage requestPackage = new RequestPackage();
-        requestPackage.setMethod(method);
-        requestPackage.setUri(uri);
-
-        // if method is 'POST' execute MyLoadTask to send every GPSData object separately
-        if (method.equals("POST")) {
-            if (dataList.size() > 0) {
-                for (GPSData data : dataList) {
-                    requestPackage.setParams("accelerometerX", data.getAccelerometerX());
-                    requestPackage.setParams("accelerometerY", data.getAccelerometerY());
-                    requestPackage.setParams("accelerometerZ", data.getAccelerometerZ());
-                    requestPackage.setParams("timeStamp", data.getTimeStamp());
-                    requestPackage.setParams("latitude", data.getLatitude());
-                    requestPackage.setParams("longitude", data.getLongitude());
-                    requestPackage.setParams("hashCode", String.valueOf(data.hashCode()));
-
-                    task.execute(requestPackage);
-                }
-            }
-        } else if (method.equals("GET")) task.execute(requestPackage);
-
-
-    }
-
-    /**
-     * inner  AsyncTask class  -----------------------------------------------
-     * (Android-specific background threads manager)
-     * to load data from source asynchronously
-     * work in the background and control the foreground at the same time
-     */
-    private class MyLoadTask extends AsyncTask<RequestPackage, String, List<GPSData>> {
-
-        /**
-         * executed before do in background
-         * has access to the main thread
-         */
-        @Override
-        protected void onPreExecute() {
-
-            if (myLoadTasks.size() == 0) {
-                progressBar.setVisibility(View.VISIBLE);
-            }
-            myLoadTasks.add(this);
-        }
-
-        /**
-         * This method can call {@link #publishProgress} to publish updates
-         * on the UI thread.
-         *
-         * @param params The parameters of the task.
-         * @return A result, defined by the subclass of this task.
-         * @see #onPreExecute()
-         * @see #onPostExecute
-         * @see #publishProgress
-         */
-        @Override
-        protected List<GPSData> doInBackground(RequestPackage... params) {
-
-            try {
-                /**  get data from HTTPManager ---------------------------*/
-
-                if (params[0].getMethod().equals("GET")) {
-                    String content = getData(params[0]);
-                    MainActivity.this.dataList = DataJSONParser.parseFeed(content);
-                }
-                if (params[0].getMethod().equals("POST")) {
-                    String content = getData(params[0]);
-                }
-
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return MainActivity.this.dataList;
-        }
-
-
-        /**
-         * This method receives a result from doInBackground()
-         * has access to the main thread
-         * executes automatically
-         *
-         * @param result
-         */
-        @Override
-        protected void onPostExecute(List<GPSData> result) {
-
-            myLoadTasks.remove(this);
-            if (myLoadTasks.size() == 0) {
-                progressBar.setVisibility(View.INVISIBLE);
-            }
-            if (result == null) {
-                Toast.makeText(MainActivity.this,
-                        "Web service not available",
-                        Toast.LENGTH_LONG).show();
-                return;
-            }
-            MainActivity.this.dataList = result;
-
-            refreshDisplay();
-        }
-
-//		@Override
-//		protected void onProgressUpdate(String... values) {
-//			updateDisplay(values[0]);
-//		}
     }
 }

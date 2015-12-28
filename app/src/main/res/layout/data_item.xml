@@ -7,52 +7,20 @@
     android:paddingBottom="10dp"
     android:orientation="horizontal">
 
-    <LinearLayout
-        android:id="@+id/first"
+    <TextView
+        android:id="@+id/timeStamp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_marginLeft="30sp"
+        android:text="TimeStamp"
         android:textSize="10sp"
-        android:textColor="@color/colorAccent"
-        android:layout_gravity="right|top">
-
-        <TextView
-            android:id="@+id/timeStamp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/timeStamp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="12sp"
-            android:layout_toEndOf="@+id/timeStamp"
-            android:layout_toRightOf="@+id/timeStamp"
-            android:singleLine="true"
-            android:text="TimeStamp"
-            android:textColor="@color/colorAccent" />
-
-        <TextView
-            android:id="@+id/tvAccelerometer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/timeStamp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="12sp"
-            android:layout_toEndOf="@+id/timeStamp"
-            android:layout_toRightOf="@+id/timeStamp"
-            android:singleLine="true"
-            android:text="Accelerometer"
-            android:textColor="@color/colorAccent"/>
-
-    </LinearLayout>
+        android:textColor="@color/colorAccent" />
 
     <LinearLayout
-        android:id="@+id/second"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/first"
-        android:layout_toRightOf="@+id/first"
+        android:layout_toEndOf="@+id/timeStamp"
+        android:layout_toRightOf="@+id/timeStamp"
         android:orientation="vertical"
         android:layout_marginLeft="20sp"
         android:layout_gravity="right|top">
@@ -85,7 +53,9 @@
             android:singleLine="true"
             android:text="Longitude"
             android:textColor="@color/list_item_text"
-            android:textSize="10sp"/>
+            android:textSize="10sp"
+
+            android:textAppearance="?android:attr/textAppearanceLarge"/>
 
     </LinearLayout>
 
