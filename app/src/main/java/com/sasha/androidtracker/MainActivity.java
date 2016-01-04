@@ -327,7 +327,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     if (MainActivity.this.location != null) {
-                        SendData sendData = new SendData(getApplicationContext());
+                        SendData sendData = new SendData(MainActivity.this.getApplicationContext());
                         GPSData[] dataArray = new GPSData[1];
                         GPSData data = MainActivity.this.getGpsData();
                         dataArray[0] = data;

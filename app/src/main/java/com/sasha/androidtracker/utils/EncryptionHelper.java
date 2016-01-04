@@ -46,7 +46,7 @@ public class EncryptionHelper {
     /**
      * String to hold name of the enc key file.
      */
-    public static final String PUBLIC_KEY_FILE = "res/key/public.key";
+    public static final String PUBLIC_KEY_FILE = "res/key/enc.key";
 
     /**
      * Generate key which contains a pair of private and public key using 1024
